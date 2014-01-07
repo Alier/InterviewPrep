@@ -25,7 +25,7 @@ public class testMain {
 		newObj.printStack(newObj.sortStack(newObj.forSort));*/
 		
 		//for binaryTree
-		int[] intArray = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+		int[] intArray = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 		binaryTree newTree = new binaryTree(intArray);
 		System.out.println("======In-order=======");
 		newTree.printTree(newTree.getRoot(),1);
