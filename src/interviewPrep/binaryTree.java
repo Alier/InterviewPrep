@@ -20,68 +20,85 @@ public class binaryTree {
 	public treeNode getRoot() {
 		return root;
 	}
-	
+
 	public treeNode getLeftSibling(treeNode curNode) {
-		if(curNode.parent != null && curNode.parent.rightLeaf == curNode) {
+		if (curNode.parent != null && curNode.parent.rightLeaf == curNode) {
 			return curNode.parent.leftLeaf;
 		}
-		
+
 		return null;
 	}
-	
-	//get the left most leaf on the lowest level
-	public treeNode getLeftMostNode(treeNode curRoot) 
-	{
-		if(curRoot.leftLeaf == null)
+
+	// get the left most leaf on the lowest level
+	public treeNode getLeftMostNode(treeNode curRoot) {
+		if (curRoot.leftLeaf == null)
 			return curRoot;
-		
+
 		return this.getLeftMostNode(curRoot.leftLeaf);
 	}
-	
-	//get the next node on the same level on the right
+
+	// get the next node on the same level on the right
 	public treeNode getNextRightSibling(treeNode curNode) {
 		treeNode parent = curNode.parent;
-		
-		if(parent == null) //curNode is root , no right sibling
+
+		if (parent == null) // curNode is root , no right sibling
 			return null;
-		
-		if(parent.leftLeaf == curNode)
+
+		if (parent.leftLeaf == curNode)
 			return parent.rightLeaf;
-		else {
-			treeNode parentRightSibling = getNextRightSibling(parent);
-			if(parentRightSibling != null && parentRightSibling.leftLeaf != null) {
-				return parentRightSibling.leftLeaf;
-			}
+
+		treeNode parentRightSibling = getNextRightSibling(parent);
+		if (parentRightSibling != null && parentRightSibling.leftLeaf != null) {
+			return parentRightSibling.leftLeaf;
 		}
-			 
+
 		return null;
 	}
-	
-	//return true if cur Node is the right most node on its level, else return false
+
+	// return the parent for next insert, next insert would be its left child
+	public treeNode getNextInsertParent() {
+		treeNode parent = this.lastInsertNode.parent;
+
+		// last insert is right child of parent
+		// scenario 1： current node is not the right most on its level, then
+		// parent's next right sibling's left child is the next spot to insert
+		if (!isRightMost(this.lastInsertNode)) {
+			return getNextRightSibling(parent) ;
+		} else {// scenario 2: parent is the right most on its level, then next
+				// insert spot should be the left child of the left most node on
+				// current node level
+			return this.getLeftMostNode(this.root);
+		}
+	}
+
+	// return true if cur Node is the right most node on its level, else return
+	// false
 	public boolean isRightMost(treeNode curNode) {
 		treeNode parent = curNode.parent;
-		
-		if(parent == null) //root
+
+		if (parent == null) // root
 			return true;
-		
-		if(parent.rightLeaf == curNode) //is parent's right leaf, see if parent's is right most
+
+		if (parent.rightLeaf == curNode) // is parent's right leaf, see if
+											// parent's is right most
 			return isRightMost(parent);
-		
+
 		return false;
 	}
-	
+
 	public boolean isLeftMost(treeNode curNode) {
 		treeNode parent = curNode.parent;
-		
-		if(parent == null) //root
+
+		if (parent == null) // root
 			return true;
-		
-		if(parent.leftLeaf == curNode) //is parent's right leaf, see if parent's is right most
+
+		if (parent.leftLeaf == curNode) // is parent's right leaf, see if
+										// parent's is right most
 			return isLeftMost(parent);
-		
+
 		return false;
 	}
-	
+
 	public binaryTree(int[] intArray) {
 		for (int i = 0; i < intArray.length; i++) {
 			// add into tree
@@ -99,45 +116,51 @@ public class binaryTree {
 	// returns true if successful, return false otherwise
 	public void addNodeBalanced(int newLeafValue) {
 		treeNode newNode = new treeNode(newLeafValue);
-		
+	
 		// root node is last insert, add to left child
-		if(this.lastInsertNode == this.root) {
+		if (this.lastInsertNode == this.root) {
 			this.lastInsertNode.leftLeaf = newNode;
 			newNode.parent = this.lastInsertNode;
 			this.lastInsertNode = newNode;
 			return;
-		} 
-		
+		}
+
 		treeNode lastParent = this.lastInsertNode.parent;
-		//if last insert node is left child, right child must be empty 
-		if(lastParent.leftLeaf == this.lastInsertNode) {
-			//right sibling must be empty
+		// if last insert node is left child, right child must be empty
+		if (lastParent.leftLeaf == this.lastInsertNode) {
+			// right sibling must be empty
 			lastParent.rightLeaf = newNode;
 			newNode.parent = lastParent;
 			this.lastInsertNode = newNode;
 			return;
 		}
-		
-		//if last insert node is right child
-		if(lastParent.rightLeaf == this.lastInsertNode) {
-			//if lastParent is the left most on its level, find right sibling and add underneath	
-			treeNode parentRightSibling = this.getNextRightSibling(lastParent);
-			if( parentRightSibling != null ){
-				parentRightSibling.leftLeaf = newNode;
-				newNode.parent = parentRightSibling;
-				this.lastInsertNode = newNode;
-				return;
-			} else {// lastParent is the right most
-				treeNode leftMostSibling = this.getLeftMostNode(this.root);
-				//if(leftMostSibling != null) {
-					leftMostSibling.leftLeaf = newNode;
-					newNode.parent = leftMostSibling;
-					this.lastInsertNode = newNode;
-					return;
-				//}
-			}
-		}
-		
+
+		// if last insert node is right child
+		treeNode nextInsertParent = this.getNextInsertParent();
+		nextInsertParent.leftLeaf = newNode;
+		newNode.parent = nextInsertParent;
+		this.lastInsertNode = newNode;
+		return;
+//		if (lastParent.rightLeaf == this.lastInsertNode) {
+//			// if lastParent is the left most on its level, find right sibling
+//			// and add underneath
+//			treeNode parentRightSibling = this.getNextRightSibling(lastParent);
+//			if (parentRightSibling != null) {
+//				parentRightSibling.leftLeaf = newNode;
+//				newNode.parent = parentRightSibling;
+//				this.lastInsertNode = newNode;
+//				return;
+//			} else {// lastParent is the right most
+//				treeNode leftMostSibling = this.getLeftMostNode(this.root);
+//				// if(leftMostSibling != null) {
+//				leftMostSibling.leftLeaf = newNode;
+//				newNode.parent = leftMostSibling;
+//				this.lastInsertNode = newNode;
+//				return;
+//				// }
+//			}
+//		}
+
 	}
 
 	/*
